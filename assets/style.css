@@ -1,0 +1,53 @@
+/* Mengubah warna background utama aplikasi agar menyerupai dark mode trading */
+.stApp {
+    background-color: #0B0E14;
+    color: #FFFFFF;
+}
+
+/* Mengatur padding konten agar seimbang */
+.block-container {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+/* Kustomisasi kartu metrik (Price, Change, RSI, dll) */
+div[data-testid="metric-container"] {
+    background-color: #131722;
+    border-radius: 8px;
+    padding: 15px;
+    border: 1px solid #2A2E39;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Mengubah style teks label pada metrik */
+div[data-testid="stMetricLabel"] {
+    color: #848E9C !important;
+    font-size: 0.85rem !important;
+    font-weight: 500;
+}
+
+/* Mengubah style teks angka utama pada metrik */
+div[data-testid="stMetricValue"] {
+    font-size: 1.6rem !important;
+    font-weight: 600 !important;
+}
+
+/* Kustomisasi tampilan Sidebar kiri */
+section[data-testid="stSidebar"] {
+    background-color: #131722 !important;
+    border-right: 1px solid #2A2E39;
+}
+
+/* Menghilangkan border default tombol di sidebar agar lebih sleek */
+section[data-testid="stSidebar"] button {
+    background-color: transparent;
+    border: none;
+    text-align: left;
+    justify-content: flex-start;
+    color: #B2B5BE;
+}
+
+section[data-testid="stSidebar"] button:hover {
+    background-color: #1E222D;
+    color: #FFFFFF;
+}
