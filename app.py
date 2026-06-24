@@ -76,7 +76,7 @@ if st.session_state.current_page == "🏠 Dashboard":
 
     with col_ticker:
 
-        stocks = load_idx_stocks()
+        stocks = load_stocks()
 
         stocks["Display"] = (
             stocks["Nama"]
