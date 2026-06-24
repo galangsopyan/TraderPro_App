@@ -113,7 +113,9 @@ if not df.empty:
     fig.add_trace(go.Candlestick(
         x=df.index, open=df['Open'], high=df['High'], 
         low=df['Low'], close=df['Close'], name='Price'
-    ), row=1, col=1)import os
+    ), row=1, col=1)
+
+import os
 import sys
 
 # --- FORCE PYTHON UNTUK MENEMUKAN FOLDER UTILS ---
