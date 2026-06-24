@@ -304,8 +304,8 @@ elif st.session_state.current_page == "⚙️ Settings":
     st.button("Simpan Pengaturan", type="primary")
 
     risk_per_share = entry_p - stop_l
-        position_size = amount_at_risk / risk_per_share
-        total_cost = position_size * entry_p
+    position_size = amount_at_risk / risk_per_share
+    total_cost = position_size * entry_p
         
         st.divider()
         rc1, rc2, rc3 = st.columns(3)
