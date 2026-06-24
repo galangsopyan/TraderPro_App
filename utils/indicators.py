@@ -1,5 +1,5 @@
 import pandas as pd
-import pandas_ta as ta
+
 
 def calculate_indicators(df: pd.DataFrame) -> pd.DataFrame:
     """
