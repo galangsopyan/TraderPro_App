@@ -145,25 +145,25 @@ if st.session_state.current_page == "🏠 Dashboard":
         avg_vol = df['Volume'].mean()
         
         # Kalkulasi Tren Tren Sederhana vs EMA50
-            if "EMA_50" in df.columns:
-                ema50 = float(df["EMA_50"].iloc[-1])
-                current_price = float(df["Close"].iloc[-1])
+        if "EMA_50" in df.columns:
+            ema50 = float(df["EMA_50"].iloc[-1])
+            current_price = float(df["Close"].iloc[-1])
+            
+            distance = ((current_price - ema50) / ema50) * 100
+            if distance > 2:
+                trend = "Bullish"
+                trend_icon = "🟢"
+            elif distance < -2:
+                trend = "Bearish"
+                trend_icon = "🔴"
+            else:
+                trend = "Sideways"
+                trend_icon = "🟡"
                 
-                distance = ((current_price - ema50) / ema50) * 100
-                if distance > 2:
-                    trend = "Bullish"
-                    trend_icon = "🟢"
-                elif distance < -2:
-                    trend = "Bearish"
-                    trend_icon = "🔴"
-                else:
-                    trend = "Sideways"
-                    trend_icon = "🟡"
-                    
-                    m4.metric(
-                        "TREND",
-                        f"{trend_icon} {trend}"
-                    )
+                m4.metric(
+                    "TREND",
+                    f"{trend_icon} {trend}"
+                )
         # Tampilkan 5 Baris Kartu Metrik Utama
         m1, m2, m3, m4, m5 = st.columns(5)
         m1.metric("PRICE", f"${current_price:.2f} USD")
