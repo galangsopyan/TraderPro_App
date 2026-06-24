@@ -1,17 +1,20 @@
 import yfinance as yf
-import pandas as pd
 
-def get_stock_data(ticker: str, period: str = "1mo") -> pd.DataFrame:
-    """
-    Mengambil data historis pasar saham berdasarkan ticker dan periode.
-    """
-    stock = yf.Ticker(ticker)
-    df = stock.history(period=period)
-    return df
+def get_stock_data(ticker, period="1mo"):
+    """Mengambil data historis harga saham"""
+    try:
+        # Menggunakan yf.download biasanya lebih aman dari rate limit dibanding Ticker.history
+        df = yf.download(ticker, period=period, progress=False)
+        return df
+    except Exception:
+        return pd.DataFrame()
 
-def get_stock_info(ticker: str) -> dict:
-    """
-    Mengambil data fundamental / statistik kunci dari sebuah perusahaan.
-    """
-    stock = yf.Ticker(ticker)
-    return stock.info
+def get_stock_info(ticker):
+    """Mengambil data fundamental perusahaan dengan pengaman rate limit"""
+    try:
+        stock = yf.Ticker(ticker)
+        # Jika sukses, kembalikan dict info bawaan yfinance
+        return stock.info
+    except Exception:
+        # Jika diblokir/rate limit oleh Yahoo Finance, kembalikan dict kosong agar app tidak crash
+        return {}
