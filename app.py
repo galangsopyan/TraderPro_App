@@ -159,11 +159,11 @@ if st.session_state.current_page == "🏠 Dashboard":
             else:
                 trend = "Sideways"
                 trend_icon = "🟡"
+        else:
+            trend = "Unknown"
+            trend_icon = "⚪"
                 
-            m4.metric(
-                "TREND",
-                f"{trend_icon} {trend}"
-            )
+            
         # Tampilkan 5 Baris Kartu Metrik Utama
         m1, m2, m3, m4, m5 = st.columns(5)
         m1.metric("PRICE", f"${current_price:.2f} USD")
