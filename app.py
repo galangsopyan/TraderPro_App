@@ -1,4 +1,5 @@
 from utils.indicators import calculate_indicators
+from utils.stock_list import load_idx_stocks
 import os
 import sys
 
@@ -72,12 +73,36 @@ if st.session_state.current_page == "🏠 Dashboard":
     st.caption("Stay updated with real-time market data and technical analysis")
     
     # Filter Controller
-    col_ticker, col_period = st.columns(2)
-    with col_ticker:
-        selected_ticker = st.selectbox("TICKER", ["AAPL", "MSFT", "GOOGL", "AMZN", "TSLA", "META"], index=0)
-    with col_period:
-        selected_period = st.selectbox("PERIOD", ["1M", "3M", "6M", "YTD", "1Y", "5Y", "ALL"], index=0)
+col_ticker, col_period = st.columns(2)
 
+with col_ticker:
+
+    stocks = load_idx_stocks()
+
+    stocks["Display"] = (
+        stocks["Nama"]
+        + " ("
+        + stocks["Ticker"]
+        + ")"
+    )
+
+    selected_display = st.selectbox(
+        "🔍 Cari Saham",
+        stocks["Display"]
+    )
+
+    selected_ticker = stocks.loc[
+        stocks["Display"] == selected_display,
+        "Ticker"
+    ].iloc[0]
+
+with col_period:
+    selected_period = st.selectbox(
+        "PERIOD",
+        ["1M", "3M", "6M", "YTD", "1Y", "5Y", "ALL"],
+        index=0
+    )
+    
     # Mapping input ke format parameter yfinance
     period_map = {"1M": "1mo", "3M": "3mo", "6M": "6mo", "YTD": "ytd", "1Y": "1y", "5Y": "5y", "ALL": "max"}
     yf_period = period_map[selected_period]
