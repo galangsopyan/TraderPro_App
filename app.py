@@ -76,21 +76,55 @@ raw_data = get_stock_data(selected_ticker, yf_period)
 df = calculate_indicators(raw_data)
 info = get_stock_info(selected_ticker)
 
-if not df.empty:
-    # Ekstraksi poin data terupdate untuk ringkasan metrik
-    current_price = df['Close'].iloc[-1]
-    prev_close = df['Close'].iloc[-2]
-    change_1d = current_price - prev_close
-    pct_change_1d = (change_1d / prev_close) * 100
-    current_rsi = df['RSI_14'].iloc[-1] if 'RSI_14' in df.columns else 50.0
-    current_vol = df['Volume'].iloc[-1]
-    avg_vol = df['Volume'].mean()
+    if not df.empty:
+        current_price = df['Close'].iloc[-1]
+        prev_close_val = df['Close'].iloc[-2] if len(df) > 1 else current_price
+        change_1d = current_price - prev_close_val
+        pct_change_1d = (change_1d / prev_close_val) * 100
+        current_rsi = df['RSI_14'].iloc[-1] if 'RSI_14' in df.columns else 50.0
 
-    # --- ROW 1: METRICS CARDS ---
-    m1, m2, m3, m4, m5 = st.columns(5)
-    m1.metric("PRICE", f"${current_price:.2f} USD")
-    m2.metric("CHANGE (1D)", f"+${change_1d:.2f}" if change_1d > 0 else f"${change_1d:.2f}", f"{pct_change_1d:+.2f}%")
-    m3.metric("RSI (14)", f"{current_rsi:.2f}")
+        # --- AMBIL DATA KEY STATISTICS DENGAN AMAN ---
+        # Untuk Open, High, Low, gunakan data dari DataFrame (100% aman dari rate limit)
+        live_open = df['Open'].iloc[-1]
+        live_high = df['High'].iloc[-1]
+        live_low = df['Low'].iloc[-1]
+        
+        # Untuk data fundamental dari 'info', gunakan .get() agar aman jika dict kosong
+        market_cap_raw = info.get('marketCap', 'N/A')
+        if isinstance(market_cap_raw, (int, float)):
+            market_cap = f"{market_cap_raw / 1e12:.2f}T" if market_cap_raw >= 1e12 else f"{market_cap_raw / 1e9:.2f}B"
+        else:
+            market_cap = "N/A"
+            
+        pe_ratio = info.get('trailingPE', 'N/A')
+        if isinstance(pe_ratio, (int, float)): pe_ratio = f"{pe_ratio:.2f}"
+        
+        eps = info.get('trailingEps', 'N/A')
+        if isinstance(eps, (int, float)): eps = f"{eps:.2f}"
+        
+        div_yield = info.get('dividendYield', 'N/A')
+        if isinstance(div_yield, (int, float)): 
+            div_yield = f"{div_yield * 100:.2f}%"
+        else:
+            div_yield = "N/A"
+
+        # ... (Kode grafik Plotly Anda tetap di sini) ...
+        
+        # --- SAAT MENAMPILKAN DI KOLOM KEY STATISTICS ---
+        # Contoh implementasi penulisan metrik Key Statistics di Streamlit Anda:
+        st.write("### Key Statistics")
+        c1, c2 = st.columns(2)
+        with c1:
+            st.write(f"**Open:** ${live_open:.2f}")
+            st.write(f"**High:** ${live_high:.2f}")
+            st.write(f"**Low:** ${live_low:.2f}")
+            st.write(f"**Prev Close:** ${prev_close_val:.2f}")
+        with c2:
+            st.write(f"**Market Cap:** {market_cap}")
+            st.write(f"**P/E Ratio:** {pe_ratio}")
+            st.write(f"**EPS (TTM):** {eps}")
+            st.write(f"**Dividend Yield:** {div_yield}")
+
     
     # Kalkulasi Tren Sederhana
     trend = "Bullish" if current_price > df['EMA_50'].iloc[-1] else "Bearish"
