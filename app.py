@@ -1,3 +1,4 @@
+from utils.indicators import calculate_indicators
 import os
 import sys
 
