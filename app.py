@@ -307,13 +307,13 @@ elif st.session_state.current_page == "⚙️ Settings":
     position_size = amount_at_risk / risk_per_share
     total_cost = position_size * entry_p
         
-        st.divider()
-        rc1, rc2, rc3 = st.columns(3)
-        rc1.metric("Uang Berisiko (Max Loss)", f"${amount_at_risk:.2f}")
-        rc2.metric("Jumlah Saham Ditransaksikan", f"{position_size:.2f} Lembar")
-        rc3.metric("Total Nilai Pembelian", f"${total_cost:.2f}")
-    else:
-        st.error("Harga Stop Loss harus lebih rendah dari Harga Entry untuk posisi Buy.")
+    st.divider()
+    rc1, rc2, rc3 = st.columns(3)
+    rc1.metric("Uang Berisiko (Max Loss)", f"${amount_at_risk:.2f}")
+    rc2.metric("Jumlah Saham Ditransaksikan", f"{position_size:.2f} Lembar")
+    rc3.metric("Total Nilai Pembelian", f"${total_cost:.2f}")
+else:
+    st.error("Harga Stop Loss harus lebih rendah dari Harga Entry untuk posisi Buy.")
 
 # 5. HALAMAN MARKET NEWS
 elif st.session_state.current_page == "📰 Market News":
