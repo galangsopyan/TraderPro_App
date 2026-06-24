@@ -38,6 +38,41 @@ section[data-testid="stSidebar"] {
     border-right: 1px solid #2A2E39;
 }
 
+/* --- SOLUSI RATA KIRI SIDEBAR MOBILE & DESKTOP --- */
+section[data-testid="stSidebar"] .stButton button {
+    background-color: transparent !important;
+    border: none !important;
+    color: #B2B5BE !important;
+    display: flex !important;
+    justify-content: flex-start !important; /* Paksa rata kiri konten flex */
+    align-items: center !important;
+    text-align: left !important;            /* Paksa rata kiri teks */
+    width: 100% !important;
+    padding-left: 15px !important;
+    border-radius: 4px !important;
+}
+
+/* Mengatur teks di dalam tombol agar konsisten rata kiri */
+section[data-testid="stSidebar"] .stButton button p {
+    text-align: left !important;
+    width: 100% !important;
+}
+
+section[data-testid="stSidebar"] .stButton button:hover {
+    background-color: #1E222D !important;
+    color: #FFFFFF !important;
+}
+
+/* Style tombol aktif mendandani halaman aktif */
+.active-menu-btn {
+    background-color: #2962FF !important;
+    color: #FFFFFF !important;
+    font-weight: bold !important;
+}
+    background-color: #131722 !important;
+    border-right: 1px solid #2A2E39;
+}
+
 /* Menghilangkan border default tombol di sidebar agar lebih sleek */
 section[data-testid="stSidebar"] button {
     background-color: transparent;
