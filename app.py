@@ -317,14 +317,14 @@ else:
 
 # 5. HALAMAN MARKET NEWS
 elif st.session_state.current_page == "📰 Market News":
-    st.title("📰 Tech Market News")
-    st.caption("Kumpulan berita fundamental pasar terkini.")
+st.title("📰 Tech Market News")
+st.caption("Kumpulan berita fundamental pasar terkini.")
     
-    news_list = [
-        {"title": "Apple Unveils New AI Features", "time": "2 hours ago", "desc": "Apple announced new generative AI architecture integrated into upcoming operating systems."},
-        {"title": "iPhone 16 Rumors Heat Up", "time": "5 hours ago", "desc": "Supply chain leaks point towards camera sensor upgrades and improved battery density."},
-        {"title": "Macro Impact on Tech Stocks", "time": "1 day ago", "desc": "Analysts break down how interest rates are shifting institutional money back to mega-caps."}
-    ]
+news_list = [
+    {"title": "Apple Unveils New AI Features", "time": "2 hours ago", "desc": "Apple announced new generative AI architecture integrated into upcoming operating systems."},
+    {"title": "iPhone 16 Rumors Heat Up", "time": "5 hours ago", "desc": "Supply chain leaks point towards camera sensor upgrades and improved battery density."},
+    {"title": "Macro Impact on Tech Stocks", "time": "1 day ago", "desc": "Analysts break down how interest rates are shifting institutional money back to mega-caps."}
+]
     for n in news_list:
         with st.container():
             st.markdown(f"### {n['title']}")
