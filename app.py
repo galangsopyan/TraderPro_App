@@ -153,14 +153,16 @@ if st.session_state.current_page == "🏠 Dashboard":
                 ema50 = float(df["EMA_50"].iloc[-1])
                 current_price = float(df["Close"].iloc[-1])
                 
-                if current_price > ema50:
+                distance = ((current_price - ema50) / ema50) * 100
+                if distance > 2:
                     trend = "Bullish"
                     trend_icon = "🟢"
-                else:
+                elif distance < -2:
                     trend = "Bearish"
                     trend_icon = "🔴"
-        except Exception as e:
-            print(e)
+                else:
+                    trend = "Sideways"
+                    trend_icon = "🟡"
 
             m4.metric(
                 "TREND",
