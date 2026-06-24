@@ -69,20 +69,3 @@ section[data-testid="stSidebar"] .stButton button:hover {
     color: #FFFFFF !important;
     font-weight: bold !important;
 }
-    background-color: #131722 !important;
-    border-right: 1px solid #2A2E39;
-}
-
-/* Menghilangkan border default tombol di sidebar agar lebih sleek */
-section[data-testid="stSidebar"] button {
-    background-color: transparent;
-    border: none;
-    text-align: left;
-    justify-content: flex-start;
-    color: #B2B5BE;
-}
-
-section[data-testid="stSidebar"] button:hover {
-    background-color: #1E222D;
-    color: #FFFFFF;
-}
