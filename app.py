@@ -2,157 +2,6 @@ import os
 import sys
 
 # --- FORCE PYTHON UNTUK MENEMUKAN FOLDER UTILS ---
-# Kode ini memaksa server Cloud membaca direktori tempat app.py berada
-current_dir = os.path.dirname(os.path.abspath(__file__))
-if current_dir not in sys.path:
-    sys.path.insert(0, current_dir)
-
-# --- BARU MASUKKAN IMPORT LAINNYA ---
-import streamlit as st
-import pandas as pd
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
-from utils.data_fetcher import get_stock_data, get_stock_info
-from utils.indicators import calculate_indicators
-
-
-
-
-# --- CONFIG HALAMAN ---
-st.set_page_config(
-    page_title="TradePro Dashboard", 
-    layout="wide", 
-    initial_sidebar_state="expanded"
-)
-
-# --- INJEK CSS KUSTOM ---
-try:
-    with open("assets/style.css") as f:
-        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-except FileNotFoundError:
-    pass
-
-# --- SIDEBAR (NAVIGASI & INDEKS GLOBAL) ---
-with st.sidebar:
-    st.markdown("<h2 style='color: #2962FF; margin-bottom: 0;'>📈 TradePro</h2>", unsafe_allow_html=True)
-    st.caption("Plan. Trade. Profit.")
-    st.write("")
-    
-    # Navigasi Menu utama
-    menu = ["🏠 Dashboard", "🔍 Screener", "⚡ Backtester", "🛡️ Risk Management", "📰 Market News", "⚙️ Settings"]
-    for item in menu:
-        st.button(item, use_container_width=True)
-        
-    st.divider()
-    st.write("**MARKET STATUS**")
-    st.success("🟢 Market Open")
-    st.caption("15:35:42 WIB · June 21, 2026")
-    
-    st.divider()
-    st.write("**MAJOR INDICES**")
-    st.metric("S&P 500", "5,487.03", "+0.65%")
-    st.metric("Nasdaq 100", "19,868.12", "+0.82%")
-    st.metric("Dow Jones", "38,589.16", "+0.35%")
-
-# --- HEADER UTAMA ---
-col_title, _ = st.columns([3, 1])
-with col_title:
-    st.title("Market Overview")
-    st.caption("Stay updated with real-time market data and technical analysis")
-
-# --- FILTER CONTROLLER ---
-col_ticker, col_period = st.columns(2)
-with col_ticker:
-    selected_ticker = st.selectbox("TICKER", ["AAPL", "MSFT", "GOOGL", "AMZN", "TSLA", "META"], index=0)
-with col_period:
-    selected_period = st.selectbox("PERIOD", ["1M", "3M", "6M", "YTD", "1Y", "5Y", "ALL"], index=0)
-
-# Mapping input ke format parameter yfinance
-period_map = {"1M": "1mo", "3M": "3mo", "6M": "6mo", "YTD": "ytd", "1Y": "1y", "5Y": "5y", "ALL": "max"}
-yf_period = period_map[selected_period]
-
-# --- PIPELINE PENGOLAHAN DATA ---
-raw_data = get_stock_data(selected_ticker, yf_period)
-df = calculate_indicators(raw_data)
-info = get_stock_info(selected_ticker)
-
-    if not df.empty:
-        current_price = df['Close'].iloc[-1]
-        prev_close_val = df['Close'].iloc[-2] if len(df) > 1 else current_price
-        change_1d = current_price - prev_close_val
-        pct_change_1d = (change_1d / prev_close_val) * 100
-        current_rsi = df['RSI_14'].iloc[-1] if 'RSI_14' in df.columns else 50.0
-
-        # --- AMBIL DATA KEY STATISTICS DENGAN AMAN ---
-        # Untuk Open, High, Low, gunakan data dari DataFrame (100% aman dari rate limit)
-        live_open = df['Open'].iloc[-1]
-        live_high = df['High'].iloc[-1]
-        live_low = df['Low'].iloc[-1]
-        
-        # Untuk data fundamental dari 'info', gunakan .get() agar aman jika dict kosong
-        market_cap_raw = info.get('marketCap', 'N/A')
-        if isinstance(market_cap_raw, (int, float)):
-            market_cap = f"{market_cap_raw / 1e12:.2f}T" if market_cap_raw >= 1e12 else f"{market_cap_raw / 1e9:.2f}B"
-        else:
-            market_cap = "N/A"
-            
-        pe_ratio = info.get('trailingPE', 'N/A')
-        if isinstance(pe_ratio, (int, float)): pe_ratio = f"{pe_ratio:.2f}"
-        
-        eps = info.get('trailingEps', 'N/A')
-        if isinstance(eps, (int, float)): eps = f"{eps:.2f}"
-        
-        div_yield = info.get('dividendYield', 'N/A')
-        if isinstance(div_yield, (int, float)): 
-            div_yield = f"{div_yield * 100:.2f}%"
-        else:
-            div_yield = "N/A"
-
-        # ... (Kode grafik Plotly Anda tetap di sini) ...
-        
-        # --- SAAT MENAMPILKAN DI KOLOM KEY STATISTICS ---
-        # Contoh implementasi penulisan metrik Key Statistics di Streamlit Anda:
-        st.write("### Key Statistics")
-        c1, c2 = st.columns(2)
-        with c1:
-            st.write(f"**Open:** ${live_open:.2f}")
-            st.write(f"**High:** ${live_high:.2f}")
-            st.write(f"**Low:** ${live_low:.2f}")
-            st.write(f"**Prev Close:** ${prev_close_val:.2f}")
-        with c2:
-            st.write(f"**Market Cap:** {market_cap}")
-            st.write(f"**P/E Ratio:** {pe_ratio}")
-            st.write(f"**EPS (TTM):** {eps}")
-            st.write(f"**Dividend Yield:** {div_yield}")
-
-    
-    # Kalkulasi Tren Sederhana
-    trend = "Bullish" if current_price > df['EMA_50'].iloc[-1] else "Bearish"
-    trend_icon = "🟢" if trend == "Bullish" else "🔴"
-    m4.metric("TREND", f"{trend_icon} {trend}", "Above EMA50" if trend == "Bullish" else "Below EMA50")
-    m5.metric("VOLUME", f"{current_vol/1e6:.2f}M", f"Avg: {avg_vol/1e6:.2f}M")
-
-    # --- ROW 2: CHART MULTI-SUBPLOTS (PRICE, VOLUME, RSI) ---
-    st.write("")
-    st.markdown("### Price Chart")
-    
-    fig = make_subplots(
-        rows=3, cols=1, 
-        shared_xaxes=True, 
-        vertical_spacing=0.04, 
-        row_heights=[0.6, 0.2, 0.2]
-    )
-
-    # Subplot 1: Candlestick & Garis EMA
-    fig.add_trace(go.Candlestick(
-        x=df.index, open=df['Open'], high=df['High'], 
-        low=df['Low'], close=df['Close'], name='Price'
-    ), row=1, col=1)
-
-import os
-import sys
-
-# --- FORCE PYTHON UNTUK MENEMUKAN FOLDER UTILS ---
 current_dir = os.path.dirname(os.path.abspath(__file__))
 if current_dir not in sys.path:
     sys.path.insert(0, current_dir)
@@ -188,7 +37,7 @@ with st.sidebar:
     st.caption("Plan. Trade. Profit.")
     st.write("")
     
-    # List Menu
+    # List Menu Utama
     menu_options = [
         "🏠 Dashboard", 
         "🔍 Screener", 
@@ -212,6 +61,7 @@ with st.sidebar:
     st.write("**MAJOR INDICES**")
     st.metric("S&P 500", "5,487.03", "+0.65%")
     st.metric("Nasdaq 100", "19,868.12", "+0.82%")
+    st.metric("Dow Jones", "38,589.16", "+0.35%")
 
 # --- LOGIK HALAMAN (ROUTING CONTROLLER) ---
 
@@ -220,40 +70,122 @@ if st.session_state.current_page == "🏠 Dashboard":
     st.title("Market Overview")
     st.caption("Stay updated with real-time market data and technical analysis")
     
+    # Filter Controller
     col_ticker, col_period = st.columns(2)
     with col_ticker:
         selected_ticker = st.selectbox("TICKER", ["AAPL", "MSFT", "GOOGL", "AMZN", "TSLA", "META"], index=0)
     with col_period:
-        selected_period = st.selectbox("PERIOD", ["1M", "3M", "6M", "YTD", "1Y"], index=0)
+        selected_period = st.selectbox("PERIOD", ["1M", "3M", "6M", "YTD", "1Y", "5Y", "ALL"], index=0)
 
-    period_map = {"1M": "1mo", "3M": "3mo", "6M": "6mo", "YTD": "ytd", "1Y": "1y"}
+    # Mapping input ke format parameter yfinance
+    period_map = {"1M": "1mo", "3M": "3mo", "6M": "6mo", "YTD": "ytd", "1Y": "1y", "5Y": "5y", "ALL": "max"}
+    yf_period = period_map[selected_period]
     
-    raw_data = get_stock_data(selected_ticker, period_map[selected_period])
+    # Pipeline Pengolahan Data
+    raw_data = get_stock_data(selected_ticker, yf_period)
     df = calculate_indicators(raw_data)
     info = get_stock_info(selected_ticker)
 
     if not df.empty:
+        # Kalkulasi Data Dasar
         current_price = df['Close'].iloc[-1]
-        prev_close = df['Close'].iloc[-2]
-        change_1d = current_price - prev_close
-        pct_change_1d = (change_1d / prev_close) * 100
+        prev_close_val = df['Close'].iloc[-2] if len(df) > 1 else current_price
+        change_1d = current_price - prev_close_val
+        pct_change_1d = (change_1d / prev_close_val) * 100
         current_rsi = df['RSI_14'].iloc[-1] if 'RSI_14' in df.columns else 50.0
+        
+        current_vol = df['Volume'].iloc[-1]
+        avg_vol = df['Volume'].mean()
+        
+        # Kalkulasi Tren Tren Sederhana vs EMA50
+        trend = "Bullish" if ('EMA_50' in df.columns and current_price > df['EMA_50'].iloc[-1]) else "Bearish"
+        trend_icon = "🟢" if trend == "Bullish" else "🔴"
 
-        # Metrics cards
-        m1, m2, m3 = st.columns(3)
+        # Tampilkan 5 Baris Kartu Metrik Utama
+        m1, m2, m3, m4, m5 = st.columns(5)
         m1.metric("PRICE", f"${current_price:.2f} USD")
         m2.metric("CHANGE (1D)", f"${change_1d:+.2f}", f"{pct_change_1d:+.2f}%")
         m3.metric("RSI (14)", f"{current_rsi:.2f}")
+        m4.metric("TREND", f"{trend_icon} {trend}", "Above EMA50" if trend == "Bullish" else "Below EMA50")
+        m5.metric("VOLUME", f"{current_vol/1e6:.2f}M", f"Avg: {avg_vol/1e6:.2f}M")
 
-        # Chart
+        # --- ROW 2: CHART MULTI-SUBPLOTS (PRICE, VOLUME, RSI) ---
         st.write("")
-        fig = make_subplots(rows=2, cols=1, shared_xaxes=True, row_heights=[0.7, 0.3], vertical_spacing=0.05)
-        fig.add_trace(go.Candlestick(x=df.index, open=df['Open'], high=df['High'], low=df['Low'], close=df['Close'], name='Price'), row=1, col=1)
+        st.markdown("### Price Chart")
+        
+        fig = make_subplots(
+            rows=3, cols=1, 
+            shared_xaxes=True, 
+            vertical_spacing=0.05, 
+            row_heights=[0.5, 0.2, 0.3]
+        )
+
+        # Subplot 1: Candlestick & Garis EMA
+        fig.add_trace(go.Candlestick(
+            x=df.index, open=df['Open'], high=df['High'], 
+            low=df['Low'], close=df['Close'], name='Price'
+        ), row=1, col=1)
+        
         if 'EMA_20' in df.columns:
             fig.add_trace(go.Scatter(x=df.index, y=df['EMA_20'], line=dict(color='#FF9800', width=1.2), name='EMA 20'), row=1, col=1)
-        fig.add_trace(go.Bar(x=df.index, y=df['Volume'], name='Volume', marker_color='gray'), row=2, col=1)
-        fig.update_layout(template='plotly_dark', height=450, margin=dict(l=10, r=10, t=10, b=10), xaxis_rangeslider_visible=False)
+        if 'EMA_50' in df.columns:
+            fig.add_trace(go.Scatter(x=df.index, y=df['EMA_50'], line=dict(color='#E91E63', width=1.2), name='EMA 50'), row=1, col=1)
+        if 'EMA_200' in df.columns:
+            fig.add_trace(go.Scatter(x=df.index, y=df['EMA_200'], line=dict(color='#00E676', width=1.2), name='EMA 200'), row=1, col=1)
+
+        # Subplot 2: Volume Bar
+        fig.add_trace(go.Bar(x=df.index, y=df['Volume'], name='Volume', marker_color='rgba(128, 128, 128, 0.6)'), row=2, col=1)
+
+        # Subplot 3: RSI Chart
+        if 'RSI_14' in df.columns:
+            fig.add_trace(go.Scatter(x=df.index, y=df['RSI_14'], line=dict(color='#2962FF', width=1.5), name='RSI'), row=3, col=1)
+            # Batas Overbought & Oversold
+            fig.add_hline(y=70, line_dash="dash", line_color="rgba(244, 67, 54, 0.5)", row=3, col=1)
+            fig.add_hline(y=30, line_dash="dash", line_color="rgba(76, 175, 80, 0.5)", row=3, col=1)
+
+        fig.update_layout(
+            template='plotly_dark', 
+            height=600, 
+            margin=dict(l=10, r=10, t=10, b=10), 
+            xaxis_rangeslider_visible=False
+        )
         st.plotly_chart(fig, use_container_width=True)
+
+        # --- ROW 3: AMBIL DATA KEY STATISTICS DENGAN AMAN ---
+        live_open = df['Open'].iloc[-1]
+        live_high = df['High'].iloc[-1]
+        live_low = df['Low'].iloc[-1]
+        
+        market_cap_raw = info.get('marketCap', 'N/A')
+        if isinstance(market_cap_raw, (int, float)):
+            market_cap = f"{market_cap_raw / 1e12:.2f}T" if market_cap_raw >= 1e12 else f"{market_cap_raw / 1e9:.2f}B"
+        else:
+            market_cap = "N/A"
+            
+        pe_ratio = info.get('trailingPE', 'N/A')
+        if isinstance(pe_ratio, (int, float)): pe_ratio = f"{pe_ratio:.2f}"
+        
+        eps = info.get('trailingEps', 'N/A')
+        if isinstance(eps, (int, float)): eps = f"{eps:.2f}"
+        
+        div_yield = info.get('dividendYield', 'N/A')
+        if isinstance(div_yield, (int, float)): 
+            div_yield = f"{div_yield * 100:.2f}%"
+        else:
+            div_yield = "N/A"
+
+        st.write("### Key Statistics")
+        c1, c2 = st.columns(2)
+        with c1:
+            st.write(f"**Open:** ${live_open:.2f}")
+            st.write(f"**High:** ${live_high:.2f}")
+            st.write(f"**Low:** ${live_low:.2f}")
+            st.write(f"**Prev Close:** ${prev_close_val:.2f}")
+        with c2:
+            st.write(f"**Market Cap:** {market_cap}")
+            st.write(f"**P/E Ratio:** {pe_ratio}")
+            st.write(f"**EPS (TTM):** {eps}")
+            st.write(f"**Dividend Yield:** {div_yield}")
     else:
         st.error("Gagal memuat data pasar.")
 
@@ -293,7 +225,6 @@ elif st.session_state.current_page == "⚡ Backtester":
     bt_data = calculate_indicators(bt_data)
     
     if len(bt_data) > 20:
-        # Logika simulasi trading sederhana
         shares = 0
         balance = capital
         for i in range(1, len(bt_data)):
@@ -302,11 +233,9 @@ elif st.session_state.current_page == "⚡ Backtester":
             prev_price = bt_data['Close'].iloc[i-1]
             prev_ema = bt_data['EMA_20'].iloc[i-1]
             
-            # Buy signal (Golden Cross over EMA20)
             if prev_price < prev_ema and price > ema and balance > price:
                 shares = balance // price
                 balance -= (shares * price)
-            # Sell signal (Death Cross under EMA20)
             elif prev_price > prev_ema and price < ema and shares > 0:
                 balance += (shares * price)
                 shares = 0
@@ -335,6 +264,45 @@ elif st.session_state.current_page == "🛡️ Risk Management":
         
     if entry_p > stop_l:
         amount_at_risk = acc_size * (risk_pct / 100)
+        risk_per_share = entry_p - stop_l
+        position_size = amount_at_risk / risk_per_share
+        total_cost = position_size * entry_p
+        
+        st.divider()
+        rc1, rc2, rc3 = st.columns(3)
+        rc1.metric("Uang Berisiko (Max Loss)", f"${amount_at_risk:.2f}")
+        rc2.metric("Jumlah Saham Ditransaksikan", f"{position_size:.2f} Lembar")
+        rc3.metric("Total Nilai Pembelian", f"${total_cost:.2f}")
+    else:
+        st.error("Harga Stop Loss harus lebih rendah dari Harga Entry untuk posisi Buy.")
+
+# 5. HALAMAN MARKET NEWS
+elif st.session_state.current_page == "📰 Market News":
+    st.title("📰 Tech Market News")
+    st.caption("Kumpulan berita fundamental pasar terkini.")
+    
+    news_list = [
+        {"title": "Apple Unveils New AI Features", "time": "2 hours ago", "desc": "Apple announced new generative AI architecture integrated into upcoming operating systems."},
+        {"title": "iPhone 16 Rumors Heat Up", "time": "5 hours ago", "desc": "Supply chain leaks point towards camera sensor upgrades and improved battery density."},
+        {"title": "Macro Impact on Tech Stocks", "time": "1 day ago", "desc": "Analysts break down how interest rates are shifting institutional money back to mega-caps."}
+    ]
+    for n in news_list:
+        with st.container():
+            st.markdown(f"### {n['title']}")
+            st.caption(n['time'])
+            st.write(n['desc'])
+            st.divider()
+
+# 6. HALAMAN SETTINGS
+elif st.session_state.current_page == "⚙️ Settings":
+    st.title("⚙️ System Settings")
+    st.caption("Konfigurasi parameter default dashboard TradePro.")
+    
+    st.checkbox("Aktifkan Notifikasi Real-time Email", value=True)
+    st.checkbox("Gunakan Cache Data Historis (Lebih Cepat)", value=True)
+    st.selectbox("Default Indicator MA Type", ["EMA (Exponential)", "SMA (Simple)", "WMA (Weighted)"])
+    st.button("Simpan Pengaturan", type="primary")
+
         risk_per_share = entry_p - stop_l
         position_size = amount_at_risk / risk_per_share
         total_cost = position_size * entry_p
