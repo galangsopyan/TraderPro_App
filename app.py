@@ -1,4 +1,3 @@
-from utils.stock_list import load_idx_stocks
 import os
 import sys
 
@@ -10,6 +9,7 @@ if current_dir not in sys.path:
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
+from utils.stock_list import load_idx_stocks
 from plotly.subplots import make_subplots
 from utils.data_fetcher import get_stock_data, get_stock_info
 from utils.indicators import calculate_indicators
