@@ -69,39 +69,61 @@ with st.sidebar:
 
 # 1. HALAMAN DASHBOARD MAIN
 if st.session_state.current_page == "🏠 Dashboard":
+
     st.title("Market Overview")
     st.caption("Stay updated with real-time market data and technical analysis")
-    
-    # Filter Controller
-col_ticker, col_period = st.columns(2)
 
-with col_ticker:
+    col_ticker, col_period = st.columns(2)
 
-    stocks = load_idx_stocks()
+    with col_ticker:
 
-    stocks["Display"] = (
-        stocks["Nama"]
-        + " ("
-        + stocks["Ticker"]
-        + ")"
+        stocks = load_idx_stocks()
+
+        stocks["Display"] = (
+            stocks["Nama"]
+            + " ("
+            + stocks["Ticker"]
+            + ")"
+        )
+
+        selected_display = st.selectbox(
+            "🔍 Cari Saham",
+            stocks["Display"]
+        )
+
+        selected_ticker = stocks.loc[
+            stocks["Display"] == selected_display,
+            "Ticker"
+        ].iloc[0]
+
+    with col_period:
+
+        selected_period = st.selectbox(
+            "PERIOD",
+            ["1M", "3M", "6M", "YTD", "1Y", "5Y", "ALL"],
+            index=0
+        )
+
+    period_map = {
+        "1M": "1mo",
+        "3M": "3mo",
+        "6M": "6mo",
+        "YTD": "ytd",
+        "1Y": "1y",
+        "5Y": "5y",
+        "ALL": "max"
+    }
+
+    yf_period = period_map[selected_period]
+
+    raw_data = get_stock_data(
+        selected_ticker,
+        yf_period
     )
 
-    selected_display = st.selectbox(
-        "🔍 Cari Saham",
-        stocks["Display"]
-    )
+    df = calculate_indicators(raw_data)
 
-    selected_ticker = stocks.loc[
-        stocks["Display"] == selected_display,
-        "Ticker"
-    ].iloc[0]
-
-with col_period:
-    selected_period = st.selectbox(
-        "PERIOD",
-        ["1M", "3M", "6M", "YTD", "1Y", "5Y", "ALL"],
-        index=0
-    )
+    info = get_stock_info(selected_ticker)
     
     # Mapping input ke format parameter yfinance
     period_map = {"1M": "1mo", "3M": "3mo", "6M": "6mo", "YTD": "ytd", "1Y": "1y", "5Y": "5y", "ALL": "max"}
@@ -124,9 +146,18 @@ with col_period:
         avg_vol = df['Volume'].mean()
         
         # Kalkulasi Tren Tren Sederhana vs EMA50
-        trend = "Bullish" if ('EMA_50' in df.columns and current_price > df['EMA_50'].iloc[-1]) else "Bearish"
-        trend_icon = "🟢" if trend == "Bullish" else "🔴"
+        if "EMA_50" in df.columns:
 
+    ema50 = float(df["EMA_50"].iloc[-1])
+
+    trend = (
+        "Bullish"
+        if current_price > ema50
+        else "Bearish"
+    )
+
+else:
+    trend = "Neutral"
         # Tampilkan 5 Baris Kartu Metrik Utama
         m1, m2, m3, m4, m5 = st.columns(5)
         m1.metric("PRICE", f"${current_price:.2f} USD")
