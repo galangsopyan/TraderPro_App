@@ -249,95 +249,156 @@ elif st.session_state.current_page == "⚡ Backtester":
     else:
         st.warning("Data tidak mencukupi untuk melakukan backtest.")
 
+# ==================================================
 # 4. HALAMAN RISK MANAGEMENT
+# ==================================================
+
 elif st.session_state.current_page == "🛡️ Risk Management":
+
     st.title("🛡️ Position Size Calculator")
     st.caption("Hitung alokasi modal dan risiko per trade secara sistematis.")
-    
+
     col_r1, col_r2 = st.columns(2)
+
     with col_r1:
-        acc_size = st.number_input("Total Saldo Akun ($)", value=5000)
-        risk_pct = st.slider("Risiko per Transaksi (%)", 1.0, 5.0, 2.0, 0.5)
+        acc_size = st.number_input(
+            "Total Saldo Akun ($)",
+            value=5000.0
+        )
+
+        risk_pct = st.slider(
+            "Risiko per Transaksi (%)",
+            1.0,
+            5.0,
+            2.0,
+            0.5
+        )
+
     with col_r2:
-        entry_p = st.number_input("Harga Entry ($)", value=150.0)
-        stop_l = st.number_input("Harga Stop Loss ($)", value=145.0)
-        
+        entry_p = st.number_input(
+            "Harga Entry ($)",
+            value=150.0
+        )
+
+        stop_l = st.number_input(
+            "Harga Stop Loss ($)",
+            value=145.0
+        )
+
     if entry_p > stop_l:
+
         amount_at_risk = acc_size * (risk_pct / 100)
+
         risk_per_share = entry_p - stop_l
+
         position_size = amount_at_risk / risk_per_share
+
         total_cost = position_size * entry_p
-        
+
         st.divider()
+
         rc1, rc2, rc3 = st.columns(3)
-        rc1.metric("Uang Berisiko (Max Loss)", f"${amount_at_risk:.2f}")
-        rc2.metric("Jumlah Saham Ditransaksikan", f"{position_size:.2f} Lembar")
-        rc3.metric("Total Nilai Pembelian", f"${total_cost:.2f}")
+
+        rc1.metric(
+            "Uang Berisiko",
+            f"${amount_at_risk:.2f}"
+        )
+
+        rc2.metric(
+            "Jumlah Saham",
+            f"{position_size:.0f}"
+        )
+
+        rc3.metric(
+            "Total Nilai Posisi",
+            f"${total_cost:.2f}"
+        )
+
     else:
-        st.error("Harga Stop Loss harus lebih rendah dari Harga Entry untuk posisi Buy.")
+        st.error(
+            "Harga Stop Loss harus lebih rendah dari Harga Entry."
+        )
 
+# ==================================================
 # 5. HALAMAN MARKET NEWS
+# ==================================================
+
 elif st.session_state.current_page == "📰 Market News":
+
     st.title("📰 Tech Market News")
-    st.caption("Kumpulan berita fundamental pasar terkini.")
-    
+
+    st.caption(
+        "Kumpulan berita fundamental pasar terkini."
+    )
+
     news_list = [
-        {"title": "Apple Unveils New AI Features", "time": "2 hours ago", "desc": "Apple announced new generative AI architecture integrated into upcoming operating systems."},
-        {"title": "iPhone 16 Rumors Heat Up", "time": "5 hours ago", "desc": "Supply chain leaks point towards camera sensor upgrades and improved battery density."},
-        {"title": "Macro Impact on Tech Stocks", "time": "1 day ago", "desc": "Analysts break down how interest rates are shifting institutional money back to mega-caps."}
+        {
+            "title": "Apple Unveils New AI Features",
+            "time": "2 hours ago",
+            "desc": "Apple announced new generative AI architecture integrated into upcoming operating systems."
+        },
+        {
+            "title": "iPhone 16 Rumors Heat Up",
+            "time": "5 hours ago",
+            "desc": "Supply chain leaks point towards camera sensor upgrades and improved battery density."
+        },
+        {
+            "title": "Macro Impact on Tech Stocks",
+            "time": "1 day ago",
+            "desc": "Analysts break down how interest rates are shifting institutional money back to mega-caps."
+        }
     ]
+
     for n in news_list:
+
         with st.container():
-            st.markdown(f"### {n['title']}")
-            st.caption(n['time'])
-            st.write(n['desc'])
+
+            st.markdown(
+                f"### {n['title']}"
+            )
+
+            st.caption(
+                n["time"]
+            )
+
+            st.write(
+                n["desc"]
+            )
+
             st.divider()
 
+# ==================================================
 # 6. HALAMAN SETTINGS
+# ==================================================
+
 elif st.session_state.current_page == "⚙️ Settings":
+
     st.title("⚙️ System Settings")
-    st.caption("Konfigurasi parameter default dashboard TradePro.")
-    
-    st.checkbox("Aktifkan Notifikasi Real-time Email", value=True)
-    st.checkbox("Gunakan Cache Data Historis (Lebih Cepat)", value=True)
-    st.selectbox("Default Indicator MA Type", ["EMA (Exponential)", "SMA (Simple)", "WMA (Weighted)"])
-    st.button("Simpan Pengaturan", type="primary")
 
-    risk_per_share = entry_p - stop_l
-    position_size = amount_at_risk / risk_per_share
-    total_cost = position_size * entry_p
-        
-    st.divider()
-    rc1, rc2, rc3 = st.columns(3)
-    rc1.metric("Uang Berisiko (Max Loss)", f"${amount_at_risk:.2f}")
-    rc2.metric("Jumlah Saham Ditransaksikan", f"{position_size:.2f} Lembar")
-    rc3.metric("Total Nilai Pembelian", f"${total_cost:.2f}")
-else:
-    st.error("Harga Stop Loss harus lebih rendah dari Harga Entry untuk posisi Buy.")
+    st.caption(
+        "Konfigurasi parameter default dashboard TradePro."
+    )
 
-# 5. HALAMAN MARKET NEWS
-elif st.session_state.current_page == "📰 Market News":
-st.title("📰 Tech Market News")
-st.caption("Kumpulan berita fundamental pasar terkini.")
-    
-news_list = [
-    {"title": "Apple Unveils New AI Features", "time": "2 hours ago", "desc": "Apple announced new generative AI architecture integrated into upcoming operating systems."},
-    {"title": "iPhone 16 Rumors Heat Up", "time": "5 hours ago", "desc": "Supply chain leaks point towards camera sensor upgrades and improved battery density."},
-    {"title": "Macro Impact on Tech Stocks", "time": "1 day ago", "desc": "Analysts break down how interest rates are shifting institutional money back to mega-caps."}
-]
-    for n in news_list:
-        with st.container():
-            st.markdown(f"### {n['title']}")
-            st.caption(n['time'])
-            st.write(n['desc'])
-            st.divider()
+    st.checkbox(
+        "Aktifkan Notifikasi Real-time Email",
+        value=True
+    )
 
-# 6. HALAMAN SETTINGS
-elif st.session_state.current_page == "⚙️ Settings":
-    st.title("⚙️ System Settings")
-    st.caption("Konfigurasi parameter default dashboard TradePro.")
-    
-    st.checkbox("Aktifkan Notifikasi Real-time Email", value=True)
-    st.checkbox("Gunakan Cache Data Historis (Lebih Cepat)", value=True)
-    st.selectbox("Default Indicator MA Type", ["EMA (Exponential)", "SMA (Simple)", "WMA (Weighted)"])
-    st.button("Simpan Pengaturan", type="primary")
+    st.checkbox(
+        "Gunakan Cache Data Historis",
+        value=True
+    )
+
+    st.selectbox(
+        "Default Indicator MA Type",
+        [
+            "EMA (Exponential)",
+            "SMA (Simple)",
+            "WMA (Weighted)"
+        ]
+    )
+
+    st.button(
+        "Simpan Pengaturan",
+        type="primary"
+    )
