@@ -214,8 +214,7 @@ with col_period:
             st.write(f"**Dividend Yield:** {div_yield}")
     else:
         st.error("Gagal memuat data pasar.")
-
-# 2. HALAMAN SCREENER
+        
 elif st.session_state.current_page == "🔍 Screener":
     st.title("🛡️ Market Screener")
     st.caption("Pindai kondisi pasar saham berdasarkan indikator teknikal real-time.")
