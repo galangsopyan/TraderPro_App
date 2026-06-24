@@ -1,4 +1,3 @@
-from utils.indicators import calculate_indicators
 from utils.stock_list import load_idx_stocks
 import os
 import sys
